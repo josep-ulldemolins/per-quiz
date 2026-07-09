@@ -1,0 +1,39 @@
+---
+import Logo from './Logo.astro'
+const year = new Date().getFullYear()
+---
+
+<footer class="border-t border-border/40 bg-background/60 backdrop-blur-sm mt-20">
+  <div class="container py-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <Logo class="h-8 w-8" />
+          <span class="font-bold">PER Quiz</span>
+        </div>
+        <p class="mt-3 text-sm text-muted-foreground max-w-sm">
+          Plataforma gratuïta per practicar amb preguntes reals d'exàmens oficials del PER de la Generalitat de Catalunya.
+        </p>
+      </div>
+      <div>
+        <h3 class="font-semibold text-sm mb-3">Recursos</h3>
+        <ul class="space-y-2 text-sm text-muted-foreground">
+          <li><a href="/" class="hover:text-foreground transition-colors">Inici</a></li>
+          <li><a href="/test/examen" class="hover:text-foreground transition-colors">Exàmens</a></li>
+          <li><a href="/test/tema" class="hover:text-foreground transition-colors">Per tema</a></li>
+          <li><a href="/test/aleatori" class="hover:text-foreground transition-colors">Aleatori</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="font-semibold text-sm mb-3">Sobre el projecte</h3>
+        <p class="text-sm text-muted-foreground">
+          Codi obert. Fet amb Astro, React i Supabase. Les preguntes provenen d'exàmens oficials.
+        </p>
+      </div>
+    </div>
+    <div class="mt-8 pt-6 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-sm text-muted-foreground">© {year} PER Quiz. Tots els drets reservats.</p>
+      <p class="text-xs text-muted-foreground">No oficial. Només amb finalitats educatives.</p>
+    </div>
+  </div>
+</footer>

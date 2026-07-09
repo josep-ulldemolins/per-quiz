@@ -1,0 +1,22 @@
+---
+import Layout from '../../../layouts/Layout.astro'
+import Header from '../../../components/layout/Header.astro'
+import Footer from '../../../components/layout/Footer.astro'
+import { TestPage } from '../../../components/test/TestPage'
+
+const { slug } = Astro.params
+const n = Number(Astro.url.searchParams.get('n') || '20')
+---
+
+<Layout title="Test per Tema - PER Quiz">
+  <Header />
+  <main>
+    <TestPage
+      client:only="react"
+      modo="tema"
+      tema={slug}
+      numPreguntas={n}
+    />
+  </main>
+  <Footer />
+</Layout>

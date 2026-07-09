@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro'
+import Header from '../components/layout/Header.astro'
+import Footer from '../components/layout/Footer.astro'
+import { Estadistiques } from '../components/home/Estadistiques'
+---
+
+<Layout title="Estadístiques - PER Quiz">
+  <Header />
+  <main class="min-h-[calc(100vh-4rem)]">
+    <Estadistiques client:load />
+  </main>
+  <Footer />
+</Layout>

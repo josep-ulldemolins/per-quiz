@@ -1,0 +1,14 @@
+---
+import Layout from '../../../layouts/Layout.astro'
+import Header from '../../../components/layout/Header.astro'
+import Footer from '../../../components/layout/Footer.astro'
+import { TemaSelector } from '../../../components/test/TemaSelector'
+---
+
+<Layout title="Tests per Tema - PER Quiz">
+  <Header />
+  <main class="min-h-[calc(100vh-4rem)]">
+    <TemaSelector client:load />
+  </main>
+  <Footer />
+</Layout>

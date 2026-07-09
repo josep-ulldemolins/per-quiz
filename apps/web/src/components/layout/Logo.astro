@@ -1,0 +1,25 @@
+---
+interface Props {
+  class?: string
+}
+const { class: className = 'h-9 w-9' } = Astro.props
+---
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class={className}>
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0EA5E9" />
+      <stop offset="50%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#14B8A6" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="100" height="100" rx="22" fill="url(#grad1)" />
+  <!-- Wave -->
+  <path d="M 10 65 Q 25 55, 40 65 T 70 65 T 90 65" stroke="white" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.5" />
+  <path d="M 10 75 Q 25 65, 40 75 T 70 75 T 90 75" stroke="white" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.4" />
+  <!-- Sailboat -->
+  <path d="M 50 25 L 50 60 L 65 60 Z" fill="white" />
+  <path d="M 50 25 L 50 60 L 35 60 Z" fill="white" opacity="0.7" />
+  <path d="M 28 60 L 72 60 L 68 70 L 32 70 Z" fill="white" />
+  <line x1="50" y1="20" x2="50" y2="60" stroke="white" stroke-width="2.5" />
+</svg>

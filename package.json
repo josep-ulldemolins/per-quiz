@@ -1,0 +1,17 @@
+{
+  "name": "per-quiz",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "preview": "pnpm --filter web preview",
+    "seed": "node scripts/import-to-supabase.mjs",
+    "split-locales": "node scripts/split-locales.mjs"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "devDependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

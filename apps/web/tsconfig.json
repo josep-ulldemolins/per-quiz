@@ -1,0 +1,14 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@per-quiz/shared": ["../../packages/shared/src/index.ts"]
+    }
+  },
+  "include": ["./src/**/*", "astro.config.mjs"],
+  "exclude": ["dist", "node_modules"]
+}

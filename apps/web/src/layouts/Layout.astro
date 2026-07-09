@@ -1,0 +1,41 @@
+---
+import '@/styles/globals.css'
+
+interface Props {
+  title?: string
+  description?: string
+}
+
+const { title = 'PER Quiz - Tests oficials', description = 'Practica per a l\'examen del PER amb preguntes reals d\'exàmens oficials' } = Astro.props
+---
+
+<!doctype html>
+<html lang="ca" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-screen bg-background font-sans antialiased ocean-pattern">
+    <slot />
+    <script is:inline>
+      // Apply theme on load
+      (function() {
+        const stored = localStorage.getItem('per-quiz-theme');
+        let theme = stored ? JSON.parse(stored).state?.theme : 'system';
+        if (!theme) theme = 'system';
+        const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark');
+      })();
+    </script>
+  </body>
+</html>

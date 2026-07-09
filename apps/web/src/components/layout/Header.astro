@@ -1,0 +1,25 @@
+---
+import { HeaderControls } from './HeaderControls'
+import Logo from './Logo.astro'
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+  <div class="container flex h-16 items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5 group">
+      <Logo class="h-9 w-9 transition-transform group-hover:scale-110" />
+      <div class="flex flex-col leading-none">
+        <span class="text-lg font-bold tracking-tight">PER Quiz</span>
+        <span class="text-xs text-muted-foreground">Tests oficials</span>
+      </div>
+    </a>
+    
+    <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+      <a href="/" class="text-foreground/60 hover:text-foreground transition-colors">Inici</a>
+      <a href="/test/examen" class="text-foreground/60 hover:text-foreground transition-colors">Exàmens</a>
+      <a href="/test/tema" class="text-foreground/60 hover:text-foreground transition-colors">Per tema</a>
+      <a href="/test/aleatori" class="text-foreground/60 hover:text-foreground transition-colors">Aleatori</a>
+    </nav>
+
+    <HeaderControls client:load />
+  </div>
+</header>

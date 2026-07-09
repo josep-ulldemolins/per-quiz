@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro'
+import Header from '../components/layout/Header.astro'
+import Footer from '../components/layout/Footer.astro'
+import { Hero } from '../components/home/Hero'
+import { ModeSelector } from '../components/home/ModeSelector'
+import { Features } from '../components/home/Features'
+---
+
+<Layout title="PER Quiz - Tests oficials">
+  <Header />
+  <main class="min-h-[calc(100vh-4rem)]">
+    <Hero client:load />
+    <ModeSelector client:load />
+    <Features client:load />
+  </main>
+  <Footer />
+</Layout>

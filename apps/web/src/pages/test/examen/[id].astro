@@ -1,0 +1,18 @@
+---
+import Layout from '../../../layouts/Layout.astro'
+import Header from '../../../components/layout/Header.astro'
+import Footer from '../../../components/layout/Footer.astro'
+import { TestPage } from '../../../components/test/TestPage'
+---
+
+<Layout title="Test Examen - PER Quiz">
+  <Header />
+  <main>
+    <TestPage
+      client:only="react"
+      modo="examen"
+      examenId={Number(Astro.params.id)}
+    />
+  </main>
+  <Footer />
+</Layout>
