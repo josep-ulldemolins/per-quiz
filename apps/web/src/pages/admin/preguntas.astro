@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import { AdminLayout } from '../../components/admin/AdminLayout'
+import { PreguntasList } from '../../components/admin/PreguntasList'
+---
+
+<Layout title="Admin · Preguntes - PER Quiz">
+  <AdminLayout client:only="react" title="Preguntes">
+    <PreguntasList client:only="react" />
+  </AdminLayout>
+</Layout>

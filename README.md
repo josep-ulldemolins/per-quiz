@@ -11,7 +11,50 @@ Plataforma web per practicar amb preguntes reals d'exàmens oficials del **PER (
 - ⌨️ **Atajos de teclat** per navegar ràpidament
 - 📱 **100% responsive** - funciona en mòbil, tablet i escriptori
 - 💾 **Sense registre** - tot es desa localment
+- 🛠️ **Editor Admin** (només en dev) per editar preguntes amb UI web
 - 🆓 **Open source** - 100% gratuït
+
+## 🛠️ Editor Admin (només en dev)
+
+Per editar les preguntes amb una interfície web, executa el servidor de desenvolupament:
+
+```bash
+pnpm dev
+```
+
+Després accedeix a `http://localhost:4321/admin` per:
+
+- **Dashboard** (`/admin`): Estadístiques generals i historial de canvis
+- **Preguntes** (`/admin/preguntas`): Llistar, cercar, filtrar i editar preguntes
+- **Editar pregunta** (`/admin/editor/pregunta/:id`): Form complet amb preview en viu
+- **Exàmens** (`/admin/examenes`): Editar metadades dels exàmens
+
+⚠️ L'editor admin **només funciona en mode dev** (`pnpm dev`). En producció retorna 403.
+
+### Proteccions
+- ✅ Backup automàtic abans de cada canvi (`per_data.json.bak`)
+- ✅ Confirmació abans d'eliminar
+- ✅ Log de tots els canvis (`admin-changes.log`)
+- ✅ Botó per restaurar el backup des del dashboard
+- ✅ Validació amb Zod a tots els endpoints
+
+### API REST (només dev)
+
+Tots els endpoints sota `/api/admin/*`:
+
+| Mètode | URL | Funció |
+|--------|-----|--------|
+| GET | `/api/admin/dashboard` | Stats + recent changes |
+| GET | `/api/admin/preguntas?q=&examen_id=&tema=&limit=&offset=` | Llistar amb filtres |
+| GET | `/api/admin/preguntas/:id` | Obtenir una |
+| POST | `/api/admin/preguntas` | Crear nova |
+| PUT | `/api/admin/preguntas/:id` | Actualitzar |
+| DELETE | `/api/admin/preguntas/:id` | Eliminar |
+| GET | `/api/admin/examenes` | Llistar |
+| POST | `/api/admin/examenes` | Crear |
+| PUT | `/api/admin/examenes/:id` | Actualitzar |
+| DELETE | `/api/admin/examenes/:id` | Eliminar (i totes les seves preguntes) |
+| POST | `/api/admin/restore-backup` | Restaurar l'últim backup |
 
 ## Stack tecnològic
 

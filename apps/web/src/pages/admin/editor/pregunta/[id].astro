@@ -1,0 +1,11 @@
+---
+import Layout from '../../../../layouts/Layout.astro'
+import { AdminLayout } from '../../../../components/admin/AdminLayout'
+import { PreguntaEditorPage } from '../../../../components/admin/PreguntaEditorPage'
+---
+
+<Layout title="Admin · Editar Pregunta">
+  <AdminLayout client:only="react" title="Editar Pregunta">
+    <PreguntaEditorPage client:only="react" preguntaId={Number(Astro.params.id)} />
+  </AdminLayout>
+</Layout>

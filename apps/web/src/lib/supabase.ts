@@ -19,7 +19,7 @@ let localDataCache: { examenes: Examen[]; preguntas: Pregunta[] } | null = null
 async function loadLocalData() {
   if (localDataCache) return localDataCache
   try {
-    const response = await fetch('/data/per_data.json')
+    const response = await fetch('/data/per_data.json?ts=' + Date.now())
     if (!response.ok) throw new Error('Local data not found')
     const data = await response.json()
     localDataCache = data
@@ -28,6 +28,11 @@ async function loadLocalData() {
     console.warn('Failed to load local data:', e)
     return { examenes: [], preguntas: [] }
   }
+}
+
+// Public function to invalidate cache (called after admin changes)
+export function invalidateLocalCache() {
+  localDataCache = null
 }
 
 export async function getExamenes(): Promise<Examen[]> {

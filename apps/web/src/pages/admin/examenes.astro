@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro'
+import { AdminLayout } from '../../components/admin/AdminLayout'
+import { ExamenesList } from '../../components/admin/ExamenesList'
+---
+
+<Layout title="Admin · Exàmens">
+  <AdminLayout client:only="react" title="Exàmens">
+    <ExamenesList client:only="react" />
+  </AdminLayout>
+</Layout>
