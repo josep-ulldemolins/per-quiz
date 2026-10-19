@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "per-quiz",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "per-quiz-src/app", "run", "dev"],
+      "port": 5173
+    }
+  ]
+}
