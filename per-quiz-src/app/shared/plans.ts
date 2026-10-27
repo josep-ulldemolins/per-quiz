@@ -30,3 +30,6 @@ export interface Access {
 export function freeExamId(bank: Pick<Bank, 'exams'>) {
   return sortExams(bank.exams)[0]?.id ?? null
 }
+
+/** What the landing page shows before anyone signs in. */
+export type Pricing = Pick<Access, 'prices' | 'examsPerDay'>

@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { AppProvider, useApp } from './store.tsx'
 import { PremiumOnly, Shell } from './components.tsx'
 import { Auth } from './pages/Auth.tsx'
+import { Landing } from './pages/Landing.tsx'
 import { Home } from './pages/Home.tsx'
 import { NewTest } from './pages/NewTest.tsx'
 import { Quiz } from './pages/Quiz.tsx'
@@ -30,6 +31,13 @@ function RequireUser({ children }: { children: ReactNode }) {
   return <Shell>{children}</Shell>
 }
 
+/** Visitors without a session get the landing page; signed-in users get their dashboard. */
+function HomeOrLanding() {
+  const { user, ready } = useApp()
+  if (!ready) return null
+  return user ? <Shell><Home /></Shell> : <Landing />
+}
+
 export function App() {
   return (
     <AppProvider>
@@ -37,7 +45,7 @@ export function App() {
         <Routes>
           <Route path="/entrar" element={<Auth mode="login" />} />
           <Route path="/registro" element={<Auth mode="register" />} />
-          <Route path="/" element={<RequireUser><Home /></RequireUser>} />
+          <Route path="/" element={<HomeOrLanding />} />
           <Route path="/temario" element={<RequireUser><TheoryIndex /></RequireUser>} />
           <Route path="/temario/guia/:guide" element={<RequireUser><TheoryGuide /></RequireUser>} />
           <Route path="/temario/:topic" element={<RequireUser><TheoryTopic /></RequireUser>} />

@@ -1,5 +1,5 @@
 import type { AttemptKind, Bank, GradeResult, Lang, PaperId } from '../shared/exam.ts'
-import type { Access, PlanId } from '../shared/plans.ts'
+import type { Access, PlanId, Pricing } from '../shared/plans.ts'
 import type { TheoryDoc, TheoryStatus } from '../shared/theory.ts'
 
 export type Theme = 'system' | 'light' | 'dark'
@@ -89,6 +89,7 @@ export const api = {
   finish: (id: string, elapsed: number) => request<Attempt>('POST', `/attempts/${id}/finish`, { elapsed }),
   deleteAttempt: (id: string) => request('DELETE', `/attempts/${id}`),
   access: () => request<Access>('GET', '/access'),
+  pricing: () => request<Pricing>('GET', '/pricing'),
   checkout: (plan: PlanId) => request<{ url: string }>('POST', '/billing/checkout', { plan }),
   confirmPayment: (session: string) => request<Access>('POST', '/billing/confirm', { session }),
   theoryIndex: () => request<Record<string, TheoryStatus>>('GET', '/theory'),

@@ -304,6 +304,9 @@ api.post('/billing/webhook', async (c) => {
   return c.json({ received: true })
 })
 
+// Prices and the free quota for the public landing page.
+api.get('/pricing', (c) => c.json({ prices: prices(c), examsPerDay: Number(c.env.FREE_DAILY_EXAMS) }))
+
 // Everything below needs a session.
 api.use('*', async (c, next) => {
   const token = getCookie(c, 'sid')
