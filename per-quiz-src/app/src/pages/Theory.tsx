@@ -6,7 +6,7 @@ import { useApp } from '../store.tsx'
 import { Loading, Meter } from '../components.tsx'
 import { customPool, formatDate, pct, topicStats } from '../lib.ts'
 import { renderMarkdown } from '../markdown.tsx'
-import { loadTheory, type TheoryDoc, type TheoryStatus } from '../theory.ts'
+import { GUIDES, loadTheory, type TheoryDoc, type TheoryStatus } from '../theory.ts'
 import { useStartTest } from '../useStartTest.ts'
 
 const PRACTICE_COUNT = 20
@@ -53,6 +53,22 @@ export function TheoryIndex() {
       <p className="lead">{t('theory.lead', { n: bank.topics.length })}</p>
 
       <section className="panel mt-32">
+        <h2 className="section-title">{t('theory.guides')}</h2>
+        <div className="theory-list">
+          {GUIDES.map((id) => (
+            <Link key={id} to={`/temario/guia/${id}`} className="row-card">
+              <span className="row-main">
+                <div className="row-title">{t(`guide.${id}.title`)}</div>
+                <div className="row-meta">{t(`guide.${id}.meta`)}</div>
+              </span>
+              <span className="row-end row"><ChevronRight className="row-icon" /></span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="panel mt-32">
+        <h2 className="section-title">{t('theory.topics')}</h2>
         <div className="theory-list">
           {bank.topics.map((tp) => {
             const s = stats.get(tp.id)
@@ -217,6 +233,39 @@ export function TheoryTopic() {
           </Link>
         )}
       </nav>
+    </div>
+  )
+}
+
+export function TheoryGuide() {
+  const { guide = '' } = useParams()
+  const { prefs, t } = useApp()
+  const id = GUIDES.find((g) => g === guide)
+  const topics = useMemo(() => (id ? [id] : []), [id])
+  const { docs, error } = useTheory(topics, prefs.lang)
+  const doc = docs[guide]
+  const rendered = useMemo(() => (doc ? renderMarkdown(doc.body) : null), [doc])
+  if (!id) return <Navigate to="/temario" replace />
+
+  return (
+    <div className="fade-in">
+      <Link to="/temario" className="link row" style={{ gap: 6, width: 'fit-content' }}>
+        <ArrowLeft className="row-icon" style={{ width: 16, height: 16 }} />
+        {t('theory.title')}
+      </Link>
+      <h1 className="page-title mt-16">{t(`guide.${id}.title`)}</h1>
+      <p className="lead">{t(`guide.${id}.meta`)}</p>
+      <article className="prose mt-32" lang={doc?.lang ?? prefs.lang}>
+        {error && <p className="notice error">{t('theory.loadError')}</p>}
+        {!error && doc === undefined && <div className="skeleton" style={{ minHeight: 240 }} aria-busy="true" />}
+        {doc === null && <p className="empty">{t('theory.missing')}</p>}
+        {doc && rendered && (
+          <>
+            {doc.lang !== prefs.lang && <p className="notice">{t('theory.notice.fallback')}</p>}
+            {rendered.nodes}
+          </>
+        )}
+      </article>
     </div>
   )
 }

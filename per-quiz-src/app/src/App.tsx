@@ -10,7 +10,7 @@ import { Results } from './pages/Results.tsx'
 import { Questions } from './pages/Questions.tsx'
 import { Stats } from './pages/Stats.tsx'
 import { Settings } from './pages/Settings.tsx'
-import { TheoryIndex, TheoryTopic } from './pages/Theory.tsx'
+import { TheoryGuide, TheoryIndex, TheoryTopic } from './pages/Theory.tsx'
 
 function RequireUser({ children }: { children: ReactNode }) {
   const { user, ready } = useApp()
@@ -29,6 +29,7 @@ export function App() {
           <Route path="/registro" element={<Auth mode="register" />} />
           <Route path="/" element={<RequireUser><Home /></RequireUser>} />
           <Route path="/temario" element={<RequireUser><TheoryIndex /></RequireUser>} />
+          <Route path="/temario/guia/:guide" element={<RequireUser><TheoryGuide /></RequireUser>} />
           <Route path="/temario/:topic" element={<RequireUser><TheoryTopic /></RequireUser>} />
           <Route path="/test/nuevo" element={<RequireUser><NewTest /></RequireUser>} />
           <Route path="/test/:id" element={<RequireUser><Quiz /></RequireUser>} />

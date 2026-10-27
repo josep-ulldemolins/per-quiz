@@ -5,6 +5,9 @@ import type { Lang } from '../shared/exam.ts'
 const files = import.meta.glob<string>('../content/temario/*.md', { query: '?raw', import: 'default' })
 const images = import.meta.glob<string>('../content/temario/img/*', { query: '?url', import: 'default', eager: true })
 
+/** General pages shown before the topics: what the PER is and how to study for it. */
+export const GUIDES = ['per', 'plan'] as const
+
 /** placeholder: outline only, not for studying · draft: written, not yet checked · reviewed: checked against its sources */
 export type TheoryStatus = 'placeholder' | 'draft' | 'reviewed'
 
