@@ -13,8 +13,7 @@
     {
       "binding": "DB",
       "database_name": "per-quiz",
-      // Replace with the id printed by `npx wrangler d1 create per-quiz` before the first deploy.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "d053c8bb-bdaf-4bfc-941a-ca6468f3116a",
       "migrations_dir": "migrations"
     }
   ],
