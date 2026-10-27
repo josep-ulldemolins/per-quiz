@@ -23,6 +23,17 @@
         "--strictPort"
       ],
       "port": 5174
+    },
+    {
+      "name": "marketing-review",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "per-quiz-src/marketing",
+        "run",
+        "review"
+      ],
+      "port": 8790
     }
   ]
 }

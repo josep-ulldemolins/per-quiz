@@ -33,6 +33,7 @@ app/                 la aplicación
   shared/exam.ts     forma del banco y criterios oficiales de aprobado (cliente y servidor)
   src/               interfaz (React + Vite), en castellano y catalán, tema claro y oscuro
   content/temario/   teoría de cada tema en Markdown (<tema>.<es|ca>.md) e imágenes en img/
+marketing/           campaña en Instagram y TikTok generada desde el banco, con revisión antes de publicar (ver su README)
 ```
 
 ## La aplicación

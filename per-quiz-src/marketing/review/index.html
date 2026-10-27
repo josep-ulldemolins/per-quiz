@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campaña PER Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ground: #ffffff; --surface: #f2f5f6; --border: #e2e8ea; --text: #182022; --muted: #5a6569; --faint: #8a9599;
+    --accent: #1b6e66; --accent-soft: #e2f0ee; --negative: #b42318; --warning-bg: #fdf3dc; --warning-ink: #7a3a0c;
+    --pos-bg: #dcf5e3; --pos-ink: #0d3b19; --neg-bg: #fdecea; --neg-ink: #7a1d14; --neutral-bg: #edf1f2; --neutral-ink: #3b4548;
+    --font: "Instrument Sans", system-ui, sans-serif; --serif: "Instrument Serif", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface); color: var(--text); font: 400 14px/1.5 var(--font); -webkit-font-smoothing: antialiased; }
+  header { position: sticky; top: 0; z-index: 2; background: var(--surface); padding: 20px 32px 12px; display: flex; flex-wrap: wrap; gap: 16px; align-items: baseline; border-bottom: 1px solid var(--border); }
+  h1 { margin: 0; font: 400 32px/1 var(--serif); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tabs button { border: 1px solid var(--border); background: var(--ground); border-radius: 999px; padding: 6px 14px; cursor: pointer; font: inherit; color: var(--muted); }
+  .tabs button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  main { padding: 24px 32px 80px; display: grid; gap: 20px; max-width: 1400px; }
+  .empty { color: var(--muted); padding: 40px 0; }
+  .post { background: var(--ground); border: 1px solid var(--border); border-radius: 22px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; }
+  .media { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 0.8fr); gap: 10px; align-items: start; }
+  .media img, .media video { width: 100%; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); display: block; }
+  .media a { display: block; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .pill { font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--neutral-bg); color: var(--neutral-ink); }
+  .pill.pending { background: var(--warning-bg); color: var(--warning-ink); }
+  .pill.approved, .pill.published { background: var(--pos-bg); color: var(--pos-ink); }
+  .pill.rejected { background: var(--neg-bg); color: var(--neg-ink); }
+  .pill.topic { background: var(--accent-soft); color: var(--accent); }
+  .muted { color: var(--muted); font-size: 12px; }
+  .question { font-weight: 600; margin: 4px 0 6px; }
+  .options { margin: 0 0 12px; padding: 0; list-style: none; color: var(--muted); }
+  .options li.correct { color: var(--accent); font-weight: 600; }
+  .alert { background: var(--warning-bg); color: var(--warning-ink); border-radius: 14px; padding: 10px 14px; margin-bottom: 12px; }
+  .alert strong { display: block; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin: 10px 0 4px; }
+  label .count { font-weight: 400; float: right; }
+  label .count.over { color: var(--negative); font-weight: 600; }
+  input, textarea { width: 100%; font: inherit; color: inherit; border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; background: var(--ground); }
+  textarea { resize: vertical; min-height: 64px; }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  .row button { font: inherit; font-weight: 500; border-radius: 999px; padding: 8px 16px; cursor: pointer; border: 1px solid var(--border); background: var(--ground); color: var(--text); }
+  .row button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .row button.danger { color: var(--negative); }
+  .row button:disabled { opacity: 0.5; cursor: progress; }
+  .copy { font-size: 12px; border: 0; background: none; color: var(--accent); cursor: pointer; padding: 0; margin-left: 8px; font-weight: 600; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 999px; opacity: 0; transition: opacity 200ms; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  @media (max-width: 900px) {
+    header, main { padding-left: 16px; padding-right: 16px; }
+    .post { grid-template-columns: 1fr; }
+    .media { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Campaña PER Quiz</h1>
+  <div class="tabs" id="tabs"></div>
+</header>
+<main id="list"></main>
+<div class="toast" id="toast"></div>
+
+<script>
+const STATUS = { pending: "Pendiente", approved: "Aprobado", rejected: "Rechazado", published: "Publicado" };
+const FILTERS = [["pending", "Pendientes"], ["approved", "Aprobados"], ["rejected", "Rechazados"], ["published", "Publicados"], ["all", "Todos"]];
+let posts = [];
+let filter = "pending";
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+async function api(method, path, body) {
+  const res = await fetch(path, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || res.statusText);
+  return data;
+}
+
+function renderTabs() {
+  $("#tabs").innerHTML = FILTERS.map(([id, label]) => {
+    const n = id === "all" ? posts.length : posts.filter((p) => p.status === id).length;
+    return `<button data-filter="${id}" aria-pressed="${filter === id}">${label} · ${n}</button>`;
+  }).join("");
+}
+
+function counter(value, max) {
+  const n = value.length;
+  return `<span class="count ${n > max ? "over" : ""}">${n}/${max}</span>`;
+}
+
+function postHtml(p) {
+  const v = encodeURIComponent(p.updatedAt);
+  const files = (f) => `/files/${p.id}/${f}?v=${v}`;
+  const date = new Date(p.scheduledFor);
+  const day = date.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+  const warnings = [];
+  if (!p.copy.answerCheck.agrees) warnings.push(`<strong>La IA no está de acuerdo con la respuesta oficial</strong>${esc(p.copy.answerCheck.note)}`);
+  else if (p.copy.answerCheck.note) warnings.push(`<strong>Nota de la IA sobre la respuesta</strong>${esc(p.copy.answerCheck.note)}`);
+  if (!p.copy.explanation) warnings.push("<strong>Falta la explicación</strong>Escríbela (o regenera con IA) y vuelve a dibujar antes de aprobar.");
+  if (!p.ai) warnings.push("<strong>Generado sin IA</strong>Los textos son de plantilla.");
+
+  return `<article class="post" data-id="${p.id}">
+    <div class="media">
+      ${p.files.slides.map((f) => `<a href="${files(f)}" target="_blank"><img src="${files(f)}" alt="${f}" loading="lazy" /></a>`).join("")}
+      ${p.files.video ? `<video src="${files(p.files.video)}" controls muted playsinline preload="metadata"></video>` : ""}
+    </div>
+    <div>
+      <div class="meta">
+        <span class="pill ${p.status}">${STATUS[p.status]}</span>
+        <span class="pill topic">${esc(p.topicName)}</span>
+        <span class="muted">${esc(p.questionId)} · ${esc(p.exam)}</span>
+      </div>
+      <div class="question">${esc(p.question)}</div>
+      <ul class="options">${p.options.map((o) => `<li class="${o.id === p.answer ? "correct" : ""}">${o.id.toUpperCase()}) ${esc(o.text)}</li>`).join("")}</ul>
+      ${warnings.map((w) => `<div class="alert">${w}</div>`).join("")}
+
+      <label for="${p.id}-scheduledFor">Publicación · ${esc(day)}</label>
+      <input type="datetime-local" id="${p.id}-scheduledFor" name="scheduledFor" value="${esc(p.scheduledFor)}" />
+
+      <label for="${p.id}-hook">Gancho del vídeo ${counter(p.copy.hook, 45)}</label>
+      <input id="${p.id}-hook" name="hook" value="${esc(p.copy.hook)}" data-max="45" />
+
+      <label for="${p.id}-explanation">Explicación (slide 2 y vídeo) ${counter(p.copy.explanation, 260)}</label>
+      <textarea id="${p.id}-explanation" name="explanation" rows="3" data-max="260">${esc(p.copy.explanation)}</textarea>
+
+      <label for="${p.id}-instagramCaption">Texto de Instagram <button class="copy" data-copy="instagram">Copiar con hashtags</button> ${counter(p.copy.instagramCaption, 900)}</label>
+      <textarea id="${p.id}-instagramCaption" name="instagramCaption" rows="6" data-max="900">${esc(p.copy.instagramCaption)}</textarea>
+
+      <label for="${p.id}-tiktokCaption">Texto de TikTok <button class="copy" data-copy="tiktok">Copiar con hashtags</button> ${counter(p.copy.tiktokCaption, 150)}</label>
+      <textarea id="${p.id}-tiktokCaption" name="tiktokCaption" rows="2" data-max="150">${esc(p.copy.tiktokCaption)}</textarea>
+
+      <label for="${p.id}-hashtags">Hashtags (separados por espacios)</label>
+      <input id="${p.id}-hashtags" name="hashtags" value="${esc(p.copy.hashtags.join(" "))}" />
+
+      <label for="${p.id}-reviewNote">Nota de revisión</label>
+      <input id="${p.id}-reviewNote" name="reviewNote" value="${esc(p.reviewNote)}" placeholder="Opcional" />
+
+      <div class="row">
+        <button class="primary" data-action="approve">Guardar y aprobar</button>
+        <button data-action="render">Guardar y volver a dibujar</button>
+        <button data-action="save">Guardar</button>
+        <button data-action="regenerate">Regenerar con IA</button>
+        <button class="danger" data-action="reject">Rechazar</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function render() {
+  renderTabs();
+  const shown = filter === "all" ? posts : posts.filter((p) => p.status === filter);
+  $("#list").innerHTML = shown.length ? shown.map(postHtml).join("") : `<p class="empty">No hay publicaciones aquí. Genera más con <code>npm run generate</code>.</p>`;
+}
+
+function formValues(article) {
+  const get = (name) => $(`[name="${name}"]`, article).value;
+  return {
+    scheduledFor: get("scheduledFor"),
+    hook: get("hook"),
+    explanation: get("explanation"),
+    instagramCaption: get("instagramCaption"),
+    tiktokCaption: get("tiktokCaption"),
+    hashtags: get("hashtags").split(/[\s,]+/).filter(Boolean),
+    reviewNote: get("reviewNote"),
+  };
+}
+
+function replace(updated) {
+  posts = posts.map((p) => (p.id === updated.id ? updated : p)).sort((a, b) => a.scheduledFor.localeCompare(b.scheduledFor));
+  render();
+}
+
+document.addEventListener("click", async (e) => {
+  const tab = e.target.closest("[data-filter]");
+  if (tab) { filter = tab.dataset.filter; render(); return; }
+
+  const copy = e.target.closest("[data-copy]");
+  if (copy) {
+    e.preventDefault();
+    const p = posts.find((x) => x.id === copy.closest(".post").dataset.id);
+    await navigator.clipboard.writeText(p.captions[copy.dataset.copy]);
+    toast("Texto copiado (versión guardada)");
+    return;
+  }
+
+  const btn = e.target.closest("[data-action]");
+  if (!btn) return;
+  const article = btn.closest(".post");
+  const id = article.dataset.id;
+  const action = btn.dataset.action;
+  article.querySelectorAll("button").forEach((b) => (b.disabled = true));
+  const label = btn.textContent;
+  try {
+    let updated;
+    if (action === "regenerate") {
+      btn.textContent = "Escribiendo…";
+      updated = await api("POST", `/api/posts/${id}/regenerate`);
+      toast("Textos nuevos generados");
+    } else {
+      const status = action === "approve" ? "approved" : action === "reject" ? "rejected" : undefined;
+      const before = posts.find((p) => p.id === id).copy;
+      const values = formValues(article);
+      // El gancho y la explicación salen en las imágenes: si cambian, hay que volver a dibujarlas antes de aprobar.
+      const stale = values.hook.trim() !== before.hook || values.explanation.trim() !== before.explanation;
+      const redraw = action === "render" || (action === "approve" && stale);
+      if (redraw) btn.textContent = "Dibujando…";
+      updated = await api("PATCH", `/api/posts/${id}`, values);
+      if (redraw) updated = await api("POST", `/api/posts/${id}/render`);
+      if (status) updated = await api("PATCH", `/api/posts/${id}`, { status });
+      toast({ approve: "Aprobado", reject: "Rechazado", render: "Imágenes y vídeo actualizados", save: "Guardado" }[action]);
+    }
+    replace(updated);
+  } catch (err) {
+    toast(err.message);
+    btn.textContent = label;
+    article.querySelectorAll("button").forEach((b) => (b.disabled = false));
+  }
+});
+
+document.addEventListener("input", (e) => {
+  const max = e.target.dataset.max;
+  if (!max) return;
+  const count = e.target.previousElementSibling.querySelector(".count");
+  if (count) {
+    count.textContent = `${e.target.value.length}/${max}`;
+    count.classList.toggle("over", e.target.value.length > Number(max));
+  }
+});
+
+api("GET", "/api/posts").then((data) => { posts = data; render(); });
+</script>
+</body>
+</html>
