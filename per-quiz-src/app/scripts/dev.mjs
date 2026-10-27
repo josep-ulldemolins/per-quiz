@@ -1,5 +1,6 @@
 // Runs the Worker (API + local D1, reloading on changes) and the Vite dev server together.
 // The local database lives in .wrangler/; the first run creates its tables and the demo user.
+// The theory files are packed for the Worker and repacked on every change.
 import { spawn, spawnSync } from 'node:child_process'
 
 for (const args of [
@@ -9,8 +10,10 @@ for (const args of [
   const r = spawnSync('npx', ['wrangler', ...args], { stdio: 'inherit' })
   if (r.status) process.exit(r.status)
 }
+spawnSync('node', ['scripts/theory.mjs'], { stdio: 'inherit' })
 
 const procs = [
+  spawn('node', ['scripts/theory.mjs', '--watch'], { stdio: 'inherit' }),
   spawn('npx', ['wrangler', 'dev', '--port', '8787'], { stdio: 'inherit' }),
   spawn('npx', ['vite', '--port', '5173', '--strictPort'], { stdio: 'inherit' }),
 ]

@@ -1,12 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronRight, Play, RotateCcw, Shuffle, FileCheck2 } from 'lucide-react'
+import { ChevronRight, Lock, Play, RotateCcw, Shuffle, FileCheck2 } from 'lucide-react'
 import { useApp } from '../store.tsx'
-import { ExamSheet, Loading, Meter } from '../components.tsx'
+import { ExamSheet, Loading, Meter, useFree } from '../components.tsx'
 import { buildSimulation, customPool, formatDate, overallStats, pct, topicStats } from '../lib.ts'
 import { useStartTest } from '../useStartTest.ts'
 
 export function Home() {
-  const { bank, user, progress, attempts, difficulty, t, topicName, prefs } = useApp()
+  const { bank, user, progress, attempts, difficulty, access, t, topicName, prefs } = useApp()
+  const free = useFree()
   const { start, busy } = useStartTest()
   const navigate = useNavigate()
   if (!bank || !user) return <Loading />
@@ -126,7 +127,11 @@ export function Home() {
               <FileCheck2 className="row-icon" />
               <span className="row-main">
                 <div className="row-title">{t('home.next.sim')}</div>
-                <div className="row-meta">{t('home.next.simMeta')}</div>
+                <div className="row-meta">
+                  {free && access
+                    ? t('quota.left', { n: Math.max(0, access.examsPerDay - access.examsToday), max: access.examsPerDay })
+                    : t('home.next.simMeta')}
+                </div>
               </span>
             </button>
             <button
@@ -151,6 +156,7 @@ export function Home() {
                   {reviewIds.length ? t('home.next.reviewMeta', { n: Math.min(30, reviewIds.length) }) : t('home.next.reviewEmpty')}
                 </div>
               </span>
+              {free && <Lock className="lock-icon" aria-label={t('lock.badge')} />}
             </button>
             <button
               className="row-card"
@@ -172,6 +178,7 @@ export function Home() {
                 <div className="row-title">{t('home.next.quick')}</div>
                 <div className="row-meta">{t('home.next.quickMeta')}</div>
               </span>
+              {free && <Lock className="lock-icon" aria-label={t('lock.badge')} />}
             </button>
           </div>
         </section>

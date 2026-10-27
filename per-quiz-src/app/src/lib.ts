@@ -1,4 +1,4 @@
-import { PAPERS, paperTopics, parseSource, type Bank, type Lang, type PaperId, type Question } from '../shared/exam.ts'
+import { PAPERS, paperTopics, type Bank, type Lang, type PaperId, type Question } from '../shared/exam.ts'
 import type { Attempt, Progress } from './api.ts'
 import { monthName } from './i18n.ts'
 
@@ -96,6 +96,8 @@ export function examLabel(bank: Bank, examId: string, lang: Lang) {
 
 // ---------- building tests ----------
 
+export { buildRealExam } from '../shared/exam.ts'
+
 function shuffle<T>(xs: T[]): T[] {
   const a = [...xs]
   for (let i = a.length - 1; i > 0; i--) {
@@ -113,18 +115,6 @@ export function buildSimulation(bank: Bank, paperId: PaperId): string[] {
     ids.push(...shuffle(pool).slice(0, count).map((q) => q.id))
   }
   return ids
-}
-
-/** The questions of one sitting, in the order they were printed. */
-export function buildRealExam(bank: Bank, examId: string): string[] {
-  const found: { id: string; position: number }[] = []
-  for (const q of bank.questions) {
-    for (const s of q.sources) {
-      const { exam, position } = parseSource(s)
-      if (exam === examId) found.push({ id: q.id, position })
-    }
-  }
-  return found.sort((a, b) => a.position - b.position).map((f) => f.id)
 }
 
 export type Pool = 'all' | 'unseen' | 'wrong' | 'weak' | 'hard' | 'bookmarked'

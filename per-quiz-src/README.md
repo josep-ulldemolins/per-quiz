@@ -78,11 +78,49 @@ Después, cada publicación es `npm run deploy`. Si cambias el esquema, añade u
   con PBKDF2 para que el inicio de sesión quepa en ese margen; si los registros de Cloudflare muestran errores de
   CPU en `/api/auth/*`, el plan Workers Paid (5 $/mes) los quita sin cambiar código.
 
+## Planes y pagos
+
+| | Gratis | 6 meses | Para siempre |
+|---|---|---|---|
+| Simulacros y exámenes reales | 3 al día, solo el último examen real | Sin límite, todos | Sin límite, todos |
+| Corrección al acabar | Completa | Completa | Completa |
+| Tests por tema, a medida y repaso de fallos | No | Sí | Sí |
+| Banco de preguntas (`/preguntas`) | No | Sí | Sí |
+| Temario | Primera sección de cada tema (las guías, enteras) | Completo | Completo |
+
+- **Las reglas se comprueban en el servidor** (`POST /api/attempts`): una cuenta gratuita solo puede crear
+  simulacros con el reparto oficial y el examen real más reciente (`freeExamId` en `shared/plans.ts`). Los
+  exámenes empezados se cuentan en `exam_starts`, así que borrar un test no devuelve el cupo. El día va por hora
+  de Madrid.
+- **Cupo y precios** en los `vars` de `wrangler.jsonc` (`FREE_DAILY_EXAMS`, `PRICE_SEMESTER_CENTS`,
+  `PRICE_LIFETIME_CENTS`); cambiarlos solo pide `npm run deploy`.
+- **El temario lo sirve el Worker** (`/api/theory/<tema>/<idioma>`), que corta el texto en el segundo `## ` para las
+  cuentas gratuitas. `scripts/theory.mjs` empaqueta los `.md` en `server/theory.gen.json` al compilar y, en
+  `npm run dev`, cada vez que cambian.
+- **Pagos con Stripe Checkout**, pago único en los dos planes. Cada pago queda en `entitlements` con la fecha de
+  caducidad (vacía en «para siempre»). Comprar 6 meses con un plan de 6 meses activo los suma al final. Una
+  devolución completa en Stripe quita el plan.
+
+Para activar los pagos:
+
+```bash
+npx wrangler secret put STRIPE_SECRET_KEY        # sk_live_… (o sk_test_… para probar)
+npx wrangler secret put STRIPE_WEBHOOK_SECRET    # whsec_… del endpoint de abajo
+npm run db:migrate && npm run deploy
+```
+
+En Stripe, Developers → Webhooks, añade el endpoint `https://<tu dominio>/api/billing/webhook` con los eventos
+`checkout.session.completed`, `checkout.session.async_payment_succeeded` y `charge.refunded`. La página de vuelta
+también confirma el pago al momento, así que el plan se activa aunque el webhook tarde. En local, copia
+`app/.dev.vars.example` a `app/.dev.vars` con las claves de prueba; sin claves, la página de planes muestra los
+precios pero no cobra.
+
 ## Temario
 
 Cada uno de los 11 temas tiene una página de teoría en `/temario/<tema>`, con tu progreso en el tema, un botón
 para practicarlo y un enlace a sus preguntas del banco (`/preguntas?tema=<tema>`). El texto vive en
-`app/content/temario/` y se añade sin tocar código: Vite recoge todos los ficheros al arrancar o compilar.
+`app/content/temario/` y se añade sin tocar código: `scripts/theory.mjs` recoge todos los ficheros al arrancar o
+compilar.
 
 - **Un fichero por tema e idioma**: `<tema>.es.md` y `<tema>.ca.md`, con los ids de `web/data/questions.json`
   (`nomenclatura`, `amarre`, `seguridad`, `legislacion`, `balizamiento`, `ripa`, `maniobra`, `emergencias`,

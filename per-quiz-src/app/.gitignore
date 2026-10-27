@@ -3,3 +3,5 @@ dist/
 data/
 .taste-skill/
 .wrangler/
+server/theory.gen.json
+.dev.vars

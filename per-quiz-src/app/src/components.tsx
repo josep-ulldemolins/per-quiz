@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { BarChart3, BookOpen, Home, ListChecks, Menu, Moon, PlusCircle, Settings, Sun, X } from 'lucide-react'
+import { BarChart3, BookOpen, Gem, Home, ListChecks, Lock, Menu, Moon, PlusCircle, Settings, Sun, X } from 'lucide-react'
 import { PAPERS, paperTopics, type Bank, type Lang } from '../shared/exam.ts'
 import { useApp } from './store.tsx'
 import type { TopicStat } from './lib.ts'
@@ -65,6 +65,7 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
     { to: '/test/nuevo', icon: PlusCircle, label: t('nav.newTest') },
     { to: '/preguntas', icon: ListChecks, label: t('nav.questions') },
     { to: '/estadisticas', icon: BarChart3, label: t('nav.stats') },
+    { to: '/planes', icon: Gem, label: t('nav.plans') },
   ]
   return (
     <nav className="nav-group">
@@ -148,6 +149,51 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="canvas">{children}</div>
       </main>
     </div>
+  )
+}
+
+/** True for a free account; false while access is loading, so nothing flickers locked for paying users. */
+export function useFree() {
+  const { access } = useApp()
+  return !!access && !access.premium
+}
+
+/** Stands in for something that needs a paid plan. */
+export function Locked({ text }: { text: string }) {
+  const { t } = useApp()
+  return (
+    <div className="locked">
+      <Lock />
+      <div className="stack gap-4">
+        <strong>{t('lock.title')}</strong>
+        <span className="muted">{text}</span>
+      </div>
+      <Link to="/planes?motivo=premium" className="btn btn-primary btn-sm">{t('lock.see')}</Link>
+    </div>
+  )
+}
+
+/** A whole page that needs a paid plan. */
+export function PremiumOnly({ title, text, children }: { title: string; text: string; children: ReactNode }) {
+  if (!useFree()) return <>{children}</>
+  return (
+    <div className="fade-in">
+      <h1 className="page-title">{title}</h1>
+      <div className="mt-24"><Locked text={text} /></div>
+    </div>
+  )
+}
+
+/** How many free exams are left today; nothing for a paying account. */
+export function Quota() {
+  const { access, t } = useApp()
+  if (!access || access.premium) return null
+  const left = Math.max(0, access.examsPerDay - access.examsToday)
+  return (
+    <p className={`notice ${left ? '' : 'warning'}`}>
+      {left ? t('quota.left', { n: left, max: access.examsPerDay }) : t('quota.none')}{' '}
+      <Link to="/planes" className="link-strong">{t('lock.see')}</Link>
+    </p>
   )
 }
 

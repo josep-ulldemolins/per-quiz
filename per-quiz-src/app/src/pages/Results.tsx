@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { RotateCcw } from 'lucide-react'
 import { api, type Attempt } from '../api.ts'
 import { useApp } from '../store.tsx'
-import { Loading, Meter } from '../components.tsx'
+import { Loading, Meter, useFree } from '../components.tsx'
 import { formatDate, formatDuration, LETTERS, pct } from '../lib.ts'
 import { useStartTest } from '../useStartTest.ts'
 
@@ -14,6 +14,7 @@ export function Results() {
   const [missing, setMissing] = useState(false)
   const [onlyWrong, setOnlyWrong] = useState(true)
   const { start, busy } = useStartTest()
+  const free = useFree()
 
   useEffect(() => {
     api.attempt(id!).then(setAttempt).catch(() => setMissing(true))
@@ -80,6 +81,13 @@ export function Results() {
           </Link>
         </div>
       </div>
+
+      {free && (
+        <p className="notice mt-24">
+          {t('res.upsell')}{' '}
+          <Link to="/planes" className="link-strong">{t('lock.see')}</Link>
+        </p>
+      )}
 
       <div className="grid mt-32">
         {r.checks.length > 0 && (

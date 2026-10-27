@@ -139,3 +139,28 @@ export function parseSource(source: string) {
   const [exam, pos] = source.split('#')
   return { exam, position: Number(pos) }
 }
+
+/** The questions of one sitting, in the order they were printed. */
+export function buildRealExam(bank: Pick<Bank, 'questions'>, examId: string): string[] {
+  const found: { id: string; position: number }[] = []
+  for (const q of bank.questions) {
+    for (const s of q.sources) {
+      const { exam, position } = parseSource(s)
+      if (exam === examId) found.push({ id: q.id, position })
+    }
+  }
+  return found.sort((a, b) => a.position - b.position).map((f) => f.id)
+}
+
+/** Most recent sitting first; the two versions of one sitting stay in order. */
+export function sortExams(exams: ExamMeta[]) {
+  return [...exams].sort((a, b) => b.year - a.year || b.month - a.month || a.place.localeCompare(b.place) || a.version - b.version)
+}
+
+/** True when the questions have the paper's official spread: the right number from each topic, none twice. */
+export function isSimulation(bank: Pick<Bank, 'topics'>, paperId: PaperId, questions: Pick<Question, 'id' | 'topic'>[]) {
+  if (new Set(questions.map((q) => q.id)).size !== questions.length) return false
+  const expected = paperTopics(bank.topics, PAPERS[paperId])
+  if (questions.length !== expected.reduce((n, e) => n + e.count, 0)) return false
+  return expected.every(({ topic, count }) => questions.filter((q) => q.topic === topic.id).length === count)
+}

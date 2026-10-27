@@ -3,19 +3,22 @@ import { Link, Navigate, useParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, BarChart3, ChevronRight, ListChecks, Play } from 'lucide-react'
 import type { Lang } from '../../shared/exam.ts'
 import { useApp } from '../store.tsx'
-import { Loading, Meter } from '../components.tsx'
+import { Loading, Locked, Meter } from '../components.tsx'
 import { customPool, formatDate, pct, topicStats } from '../lib.ts'
 import { renderMarkdown } from '../markdown.tsx'
 import { GUIDES, loadTheory, type TheoryDoc, type TheoryStatus } from '../theory.ts'
 import { useStartTest } from '../useStartTest.ts'
+import { api } from '../api.ts'
 
 const PRACTICE_COUNT = 20
 
 /** Loads the theory files of the given topics; undefined while loading, null when a topic has none. */
 function useTheory(topics: string[], lang: Lang) {
+  const { access } = useApp()
   const [docs, setDocs] = useState<Record<string, TheoryDoc | null | undefined>>({})
   const [error, setError] = useState(false)
-  const key = `${lang}:${topics.join(',')}`
+  // Reloads when a plan starts or ends, since that changes how much of each topic comes back.
+  const key = `${lang}:${topics.join(',')}:${access?.premium}`
   useEffect(() => {
     let live = true
     setDocs({})
@@ -41,9 +44,11 @@ function StatusPill({ status }: { status: TheoryStatus | undefined }) {
 }
 
 export function TheoryIndex() {
-  const { bank, progress, prefs, t, topicName } = useApp()
-  const ids = useMemo(() => bank?.topics.map((tp) => tp.id) ?? [], [bank])
-  const { docs } = useTheory(ids, prefs.lang)
+  const { bank, progress, t, topicName } = useApp()
+  const [statuses, setStatuses] = useState<Record<string, TheoryStatus>>({})
+  useEffect(() => {
+    api.theoryIndex().then(setStatuses).catch(console.error)
+  }, [])
   if (!bank) return <Loading />
   const stats = new Map(topicStats(bank, progress).map((s) => [s.id, s]))
 
@@ -81,7 +86,7 @@ export function TheoryIndex() {
                   </div>
                 </span>
                 <span className="row-end row">
-                  <StatusPill status={docs[tp.id]?.status} />
+                  <StatusPill status={statuses[tp.id]} />
                   <span className="stack gap-4" style={{ alignItems: 'flex-end', width: 56 }}>
                     <span className="num small">{s?.accuracy == null ? '–' : `${pct(s.accuracy)} %`}</span>
                     <Meter value={s?.accuracy ?? null} />
@@ -147,6 +152,7 @@ export function TheoryTopic() {
               {doc.status !== 'reviewed' && <p className="notice warning">{t(`theory.notice.${doc.status}`)}</p>}
               {doc.lang !== prefs.lang && <p className="notice">{t('theory.notice.fallback')}</p>}
               {rendered.nodes}
+              {doc.locked && <Locked text={t('lock.theory')} />}
               {(doc.sources.length > 0 || doc.updated) && (
                 <footer className="theory-sources">
                   {doc.sources.length > 0 && (

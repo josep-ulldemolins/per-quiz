@@ -17,5 +17,12 @@
       "migrations_dir": "migrations"
     }
   ],
+  // Free plan quota and prices (euro cents). Stripe keys are secrets: `wrangler secret put STRIPE_SECRET_KEY` and
+  // `wrangler secret put STRIPE_WEBHOOK_SECRET`; locally they go in .dev.vars (see .dev.vars.example).
+  "vars": {
+    "FREE_DAILY_EXAMS": "3",
+    "PRICE_SEMESTER_CENTS": "999",
+    "PRICE_LIFETIME_CENTS": "1999"
+  },
   "observability": { "enabled": true }
 }

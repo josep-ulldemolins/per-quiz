@@ -636,3 +636,24 @@ td .meter { width: 80px; display: inline-block; vertical-align: middle; margin-l
   .q-figure img { max-height: 220px; }
   .option { font-size: 15px; padding: 12px 14px; }
 }
+
+/* ---------- plans ---------- */
+.locked {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 16px 18px; border-radius: var(--radius-card); background: var(--accent-soft);
+}
+.locked > svg { width: 20px; height: 20px; color: var(--accent); flex: none; }
+.locked .stack { flex: 1 1 260px; font-size: 14px; }
+.link-strong { color: inherit; font-weight: 600; }
+.lock-icon { width: 15px; height: 15px; color: var(--faint); }
+.plan { display: flex; flex-direction: column; gap: 18px; }
+.plan.current { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.plan-price { font-size: 32px; letter-spacing: -0.02em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.plan ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+.plan li { display: flex; gap: 8px; align-items: flex-start; }
+.plan li svg { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--accent); }
+.plan li.off { color: var(--faint); }
+.plan li.off svg { color: var(--faint); }
+.plan .btn { margin-top: auto; }
+.prose .locked { margin-top: 28px; }
+.prose .locked .btn { color: var(--ground); text-decoration: none; }

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Bank, Lang, Question } from '../shared/exam.ts'
+import type { Access } from '../shared/plans.ts'
 import { api, ApiError, type Attempt, type Progress, type Theme, type User } from './api.ts'
 import { translator, TOPIC_NAMES, type T } from './i18n.ts'
 
@@ -18,6 +19,9 @@ interface AppState {
   progress: Progress
   difficulty: Record<string, [number, number]>
   attempts: Attempt[]
+  /** null until loaded */
+  access: Access | null
+  setAccess: (a: Access) => void
   prefs: Prefs
   t: T
   topicName: (id: string) => string
@@ -55,6 +59,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [progress, setProgress] = useState<Progress>(EMPTY_PROGRESS)
   const [difficulty, setDifficulty] = useState<Record<string, [number, number]>>({})
   const [attempts, setAttempts] = useState<Attempt[]>([])
+  const [access, setAccess] = useState<Access | null>(null)
   const [prefs, setPrefsState] = useState<Prefs>(readLocalPrefs)
 
   const setUser = useCallback((u: User | null) => {
@@ -63,6 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     else {
       setProgress(EMPTY_PROGRESS)
       setAttempts([])
+      setAccess(null)
     }
   }, [])
 
@@ -99,10 +105,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [setUser])
 
   const refresh = useCallback(async () => {
-    const [p, d, a] = await Promise.all([api.progress(), api.difficulty(), api.attempts()])
+    const [p, d, a, x] = await Promise.all([api.progress(), api.difficulty(), api.attempts(), api.access()])
     setProgress(p)
     setDifficulty(d)
     setAttempts(a)
+    setAccess(x)
   }, [])
 
   useEffect(() => {
@@ -139,6 +146,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       progress,
       difficulty,
       attempts,
+      access,
+      setAccess,
       prefs,
       t,
       topicName: (id) => TOPIC_NAMES[prefs.lang][id] ?? id,
@@ -148,7 +157,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       noteAnswer,
       toggleBookmark,
     }
-  }, [user, ready, bank, questionById, progress, difficulty, attempts, prefs, setUser, setPrefs, refresh, noteAnswer, toggleBookmark])
+  }, [user, ready, bank, questionById, progress, difficulty, attempts, access, prefs, setUser, setPrefs, refresh, noteAnswer, toggleBookmark])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

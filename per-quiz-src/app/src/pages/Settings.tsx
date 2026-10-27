@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import type { Lang } from '../../shared/exam.ts'
 import { api, type Theme } from '../api.ts'
@@ -7,7 +7,7 @@ import { useApp } from '../store.tsx'
 import { formatDate } from '../lib.ts'
 
 export function Settings() {
-  const { user, prefs, setPrefs, setUser, refresh, t } = useApp()
+  const { user, access, prefs, setPrefs, setUser, refresh, t } = useApp()
   const navigate = useNavigate()
   const [name, setName] = useState(user?.name ?? '')
   const [saved, setSaved] = useState(false)
@@ -59,6 +59,22 @@ export function Settings() {
           {user.email} · {t('set.memberSince', { date: formatDate(user.createdAt, prefs.lang) })}
         </p>
       </section>
+
+      {access && (
+        <section className="panel mt-16 row wrap" style={{ gap: 12 }}>
+          <div className="stack gap-4" style={{ flex: '1 1 260px' }}>
+            <h2 className="section-title">{t('set.plan')}</h2>
+            <span className="small muted">
+              {!access.plan
+                ? t('set.plan.free', { n: access.examsPerDay })
+                : `${t(access.plan === 'lifetime' ? 'plans.lifetime' : 'plans.semester')} · ${
+                    access.expiresAt ? t('plans.until', { date: formatDate(access.expiresAt, prefs.lang) }) : t('plans.forever')
+                  }`}
+            </span>
+          </div>
+          <Link to="/planes" className="btn btn-outline btn-sm">{t('lock.see')}</Link>
+        </section>
+      )}
 
       <section className="panel mt-16 stack gap-24">
         <h2 className="section-title">{t('set.appearance')}</h2>

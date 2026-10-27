@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { api } from './api.ts'
+import { api, ApiError } from './api.ts'
 import { useApp } from './store.tsx'
 
 type NewAttempt = Parameters<typeof api.createAttempt>[0]
@@ -19,8 +19,11 @@ export function useStartTest() {
       const attempt = await api.createAttempt(a)
       refresh().catch(() => {})
       navigate(`/test/${attempt.id}`)
-    } catch {
-      setError(true)
+    } catch (e) {
+      // Free accounts: tests that need a plan, or no exams left today, lead to the plans page.
+      if (e instanceof ApiError && (e.code === 'premium' || e.code === 'daily_limit'))
+        navigate(`/planes?motivo=${e.code === 'premium' ? 'premium' : 'limite'}`)
+      else setError(true)
     } finally {
       setBusy(false)
     }

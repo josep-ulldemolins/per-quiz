@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { ChevronRight } from 'lucide-react'
-import { PAPERS, type PaperId } from '../../shared/exam.ts'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ChevronRight, Lock } from 'lucide-react'
+import { PAPERS, sortExams, type PaperId } from '../../shared/exam.ts'
 import { useApp } from '../store.tsx'
-import { Loading } from '../components.tsx'
+import { Loading, Locked, Quota, useFree } from '../components.tsx'
 import { buildRealExam, buildSimulation, customPool, examLabel, sortByTopic, type Pool } from '../lib.ts'
 import { useStartTest } from '../useStartTest.ts'
 import type { Key } from '../i18n.ts'
@@ -20,7 +20,9 @@ const POOLS: Pool[] = ['all', 'unseen', 'wrong', 'weak', 'hard', 'bookmarked']
 const COUNTS = [10, 20, 30, 45, 0]
 
 export function NewTest() {
-  const { bank, progress, difficulty, attempts, t, topicName, prefs } = useApp()
+  const { bank, progress, difficulty, attempts, access, t, topicName, prefs } = useApp()
+  const free = useFree()
+  const navigate = useNavigate()
   const [params, setParams] = useSearchParams()
   const tab = (TABS.find((x) => x.id === params.get('tipo'))?.id ?? 'simulacro') as Tab
   const { start, busy, error } = useStartTest()
@@ -44,6 +46,7 @@ export function NewTest() {
     setMode(id === 'medida' ? 'practice' : 'exam')
   }
   const timeLimit = timer ? timer * 60 : null
+  const locked = tab === 'medida' && free
 
   const bestByExam = new Map<string, number>()
   for (const a of attempts) {
@@ -52,7 +55,7 @@ export function NewTest() {
     const errors = a.result.total - a.result.correct
     bestByExam.set(exam, Math.min(bestByExam.get(exam) ?? Infinity, errors))
   }
-  const exams = [...bank.exams].sort((a, b) => b.year - a.year || b.month - a.month || a.place.localeCompare(b.place) || a.version - b.version)
+  const exams = sortExams(bank.exams)
   const years = [...new Set(exams.map((e) => e.year))]
 
   const toggleTopic = (id: string) =>
@@ -92,7 +95,7 @@ export function NewTest() {
       </div>
 
       <div className="grid mt-24">
-        <section className="panel span-8">
+        <section className={`panel ${locked ? 'span-12' : 'span-8'}`}>
           {tab === 'simulacro' && (
             <div className="stack gap-24">
               <p className="muted" style={{ maxWidth: '62ch' }}>{t('new.sim.lead')}</p>
@@ -145,13 +148,14 @@ export function NewTest() {
                       .map((e) => {
                         const best = bestByExam.get(e.id)
                         const ids = buildRealExam(bank, e.id)
+                        const locked = free && e.id !== access?.freeExam
                         return (
                           <button
                             key={e.id}
                             className="row-card"
                             disabled={busy}
                             onClick={() =>
-                              start({
+                              locked ? navigate('/planes?motivo=premium') : start({
                                 kind: 'real',
                                 paper: 'per',
                                 title: `${examLabel(bank, e.id, prefs.lang)} · ${t('new.real.version', { n: e.version })}`,
@@ -169,7 +173,9 @@ export function NewTest() {
                               </div>
                             </span>
                             <span className="row-end row">
-                              {best == null ? (
+                              {locked ? (
+                                <Lock className="lock-icon" aria-label={t('lock.badge')} />
+                              ) : best == null ? (
                                 <span className="small faint">{t('new.real.notTried')}</span>
                               ) : (
                                 <span className={`pill ${best <= PAPERS.per.maxErrors ? 'pill-positive' : 'pill-neutral'}`}>
@@ -187,7 +193,9 @@ export function NewTest() {
             </div>
           )}
 
-          {tab === 'medida' && (
+          {locked && <Locked text={t('lock.custom')} />}
+
+          {tab === 'medida' && !free && (
             <div className="stack gap-24">
               <div className="field">
                 <span className="label">{t('new.custom.topics')}</span>
@@ -232,7 +240,7 @@ export function NewTest() {
           )}
         </section>
 
-        <aside className="panel span-4 side stack gap-24" style={{ alignSelf: 'start' }}>
+        {!locked && <aside className="panel span-4 side stack gap-24" style={{ alignSelf: 'start' }}>
           <div className="field">
             <span className="label">{t('new.feedback')}</span>
             <div>
@@ -250,6 +258,7 @@ export function NewTest() {
               ))}
             </select>
           </div>
+          {tab !== 'medida' && <Quota />}
           {tab !== 'real' && (
             <button
               className="btn btn-primary"
@@ -272,7 +281,7 @@ export function NewTest() {
             </button>
           )}
           {error && <p className="notice error">{t('auth.err.generic')}</p>}
-        </aside>
+        </aside>}
       </div>
     </div>
   )
