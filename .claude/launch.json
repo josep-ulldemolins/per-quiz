@@ -4,8 +4,25 @@
     {
       "name": "per-quiz",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "per-quiz-src/app", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "per-quiz-src/app",
+        "run",
+        "dev"
+      ],
       "port": 5173
+    },
+    {
+      "name": "per-quiz-web-5174",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "per-quiz-src/app/node_modules/vite/bin/vite.js",
+        "per-quiz-src/app",
+        "--port",
+        "5174",
+        "--strictPort"
+      ],
+      "port": 5174
     }
   ]
 }

@@ -117,6 +117,11 @@ api.post('/auth/logout', (c) => {
   return c.json({ ok: true })
 })
 
+api.get('/health', (c) => {
+  db.prepare('SELECT 1').get()
+  return c.json({ ok: true })
+})
+
 // Revalidated on every load, so a regenerated bank reaches people at once.
 api.get('/bank', compress(), (c) => {
   c.header('Cache-Control', 'no-cache')

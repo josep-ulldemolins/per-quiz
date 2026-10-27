@@ -1,4 +1,5 @@
 import { useDeferredValue, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Bookmark, BookmarkCheck, Search } from 'lucide-react'
 import { useApp } from '../store.tsx'
 import { Loading } from '../components.tsx'
@@ -15,7 +16,11 @@ const normalize = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '
 export function Questions() {
   const { bank, progress, difficulty, prefs, t, topicName, toggleBookmark } = useApp()
   const [query, setQuery] = useState('')
-  const [topic, setTopic] = useState('')
+  // The topic filter lives in the URL (?tema=ripa) so other pages can link to one topic's questions.
+  const [params, setParams] = useSearchParams()
+  const rawTopic = params.get('tema') ?? ''
+  const topic = bank?.topics.some((tp) => tp.id === rawTopic) ? rawTopic : ''
+  const setTopic = (id: string) => setParams(id ? { tema: id } : {}, { replace: true })
   const [status, setStatus] = useState<Status>('all')
   const [limit, setLimit] = useState(PAGE)
   const [open, setOpen] = useState<string | null>(null)

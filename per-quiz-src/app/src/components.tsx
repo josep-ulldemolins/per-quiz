@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { BarChart3, Home, ListChecks, Menu, Moon, PlusCircle, Settings, Sun, X } from 'lucide-react'
+import { BarChart3, BookOpen, Home, ListChecks, Menu, Moon, PlusCircle, Settings, Sun, X } from 'lucide-react'
 import { PAPERS, paperTopics, type Bank, type Lang } from '../shared/exam.ts'
 import { useApp } from './store.tsx'
 import type { TopicStat } from './lib.ts'
@@ -61,6 +61,7 @@ function NavItems({ onNavigate }: { onNavigate?: () => void }) {
   const { t } = useApp()
   const items = [
     { to: '/', icon: Home, label: t('nav.home'), end: true },
+    { to: '/temario', icon: BookOpen, label: t('nav.theory') },
     { to: '/test/nuevo', icon: PlusCircle, label: t('nav.newTest') },
     { to: '/preguntas', icon: ListChecks, label: t('nav.questions') },
     { to: '/estadisticas', icon: BarChart3, label: t('nav.stats') },

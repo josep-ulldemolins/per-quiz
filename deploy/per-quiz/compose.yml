@@ -1,0 +1,24 @@
+# PER Quiz on the VPS. Run from this folder: docker compose up -d --build
+name: per-quiz
+
+services:
+  per-quiz:
+    build: ../../per-quiz-src
+    image: per-quiz:latest
+    restart: unless-stopped
+    environment:
+      BACKUP_DIR: /backups
+      BACKUP_KEEP: "14"
+    volumes:
+      - data:/data
+      - ./backups:/backups
+    networks:
+      - web
+
+networks:
+  web:
+    name: web
+    external: true
+
+volumes:
+  data:

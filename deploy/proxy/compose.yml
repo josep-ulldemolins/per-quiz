@@ -1,0 +1,30 @@
+# Shared reverse proxy for every app on the VPS. Caddy gets and renews HTTPS certificates on its own.
+# Each app joins the external "web" network and adds one file to sites/.
+name: proxy
+
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./sites:/etc/caddy/sites:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - web
+
+networks:
+  web:
+    name: web
+    external: true
+
+volumes:
+  caddy_data:
+  caddy_config:

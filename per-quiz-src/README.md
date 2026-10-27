@@ -32,6 +32,7 @@ app/                 la aplicación
   server/            API (Node + Hono + SQLite de Node): cuentas, tests, respuestas, estadísticas
   shared/exam.ts     forma del banco y criterios oficiales de aprobado (cliente y servidor)
   src/               interfaz (React + Vite), en castellano y catalán, tema claro y oscuro
+  content/temario/   teoría de cada tema en Markdown (<tema>.<es|ca>.md) e imágenes en img/
 ```
 
 ## La aplicación
@@ -51,11 +52,46 @@ npm run build
 npm start            # sirve la web y la API en :8787 (API_PORT para cambiarlo)
 ```
 
+Para publicarla en un VPS con Docker y HTTPS, sigue [deploy/README.md](../deploy/README.md).
+
 La base de datos se crea en `app/data/per-quiz.db` (`DB_PATH` para cambiarla). Cada usuario guarda sus tests,
 respuestas y preguntas marcadas. La dificultad «para todos» sale del porcentaje de fallo de todos los usuarios
 en cada pregunta, a partir de 3 respuestas.
 
 Usuario de prueba de la base de datos local de desarrollo: `demo@per-quiz.test` / `demo-per-2026`.
+
+## Temario
+
+Cada uno de los 11 temas tiene una página de teoría en `/temario/<tema>`, con tu progreso en el tema, un botón
+para practicarlo y un enlace a sus preguntas del banco (`/preguntas?tema=<tema>`). El texto vive en
+`app/content/temario/` y se añade sin tocar código: Vite recoge todos los ficheros al arrancar o compilar.
+
+- **Un fichero por tema e idioma**: `<tema>.es.md` y `<tema>.ca.md`, con los ids de `web/data/questions.json`
+  (`nomenclatura`, `amarre`, `seguridad`, `legislacion`, `balizamiento`, `ripa`, `maniobra`, `emergencias`,
+  `meteorologia`, `navegacion`, `carta`). Si falta un idioma se muestra el otro con un aviso.
+- **Cabecera** entre `---` con el estado del texto, la fecha de revisión y las fuentes (`source` se puede repetir):
+
+  ```markdown
+  ---
+  status: draft          # placeholder | draft | reviewed
+  updated: 2026-11-02    # opcional, fecha de la última revisión
+  source: Nombre de la norma o del manual, artículo o página
+  ---
+  ```
+
+  `placeholder` es un esquema sin contenido y `draft` un texto sin revisar; los dos se muestran con un aviso
+  para que nadie estudie con ellos. Solo `reviewed` se publica sin aviso, y solo cuando el texto está
+  contrastado con las fuentes que cita. Hoy todos los temas son `placeholder`.
+- **Markdown admitido**: `##`, `###` y `####` (el título de la página es el nombre del tema; cada `##` entra en
+  el índice lateral «En este tema»), párrafos, listas `-` y `1.` (un nivel; las líneas sangradas continúan el
+  elemento), citas `>` (se ven como un recuadro destacado), tablas con `|`, separadores `---`, **negrita**,
+  *cursiva*, `código` y enlaces. Los enlaces que empiezan por `/` navegan dentro de la app
+  (p. ej. `[preguntas de RIPA](/preguntas?tema=ripa)`); el resto se abren en otra pestaña. No se admite HTML.
+- **Imágenes**: se guardan en `app/content/temario/img/` y se enlazan como `![Pie de figura](img/nombre.webp)`.
+  Una imagen sola en un párrafo se muestra como figura con el texto alternativo de pie. También se pueden usar
+  las figuras del banco con su ruta absoluta (`/img/<fichero>.webp`).
+
+El lector de Markdown está en `app/src/markdown.tsx` y la carga de ficheros en `app/src/theory.ts`.
 
 ## Regenerar las preguntas
 

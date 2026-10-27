@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/.DS_Store
+app/data
+app/.taste-skill
+app/*.tsbuildinfo
+build
+scripts
