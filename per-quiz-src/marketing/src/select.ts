@@ -26,10 +26,10 @@ function weightedPick<T>(items: T[], weight: (item: T) => number): T {
 }
 
 export function pickQuestions(count: number): Question[] {
-  const used = new Set(loadPosts().map((p) => p.questionId));
+  const used = new Set(loadPosts().map((p) => p.questionId).filter(Boolean));
   const pool = bank().questions.filter((q) => !used.has(q.id) && !isAnnulled(q) && fitsSocial(q));
   const picked: Question[] = [];
-  let lastTopic = loadPosts().at(-1)?.topic;
+  let lastTopic = loadPosts().filter((p) => p.kind !== "promo").at(-1)?.topic;
 
   while (picked.length < count) {
     const remaining = pool.filter((q) => !picked.includes(q));

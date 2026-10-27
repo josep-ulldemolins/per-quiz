@@ -6,6 +6,8 @@
     "generate": "node src/generate.ts",
     "review": "node src/review.ts",
     "redraw": "node src/redraw.ts",
+    "screenshots": "node src/screenshots.ts",
+    "launch": "node src/launch.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
+    "puppeteer-core": "^25.16.0",
     "typescript": "^7.0.2"
   },
   "allowScripts": {

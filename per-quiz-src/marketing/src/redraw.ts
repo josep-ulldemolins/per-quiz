@@ -8,5 +8,5 @@ const posts = ids.length ? ids.map(loadPost) : loadPosts().filter((p) => p.statu
 
 for (const post of posts) {
   await buildPost(post);
-  console.log(`✓ ${post.id}${post.copy.explanation ? "" : "  (sin explicación)"}`);
+  console.log(`✓ ${post.id}${post.kind === "promo" || post.copy.explanation ? "" : "  (sin explicación)"}`);
 }

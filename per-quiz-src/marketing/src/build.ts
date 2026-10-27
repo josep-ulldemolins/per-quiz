@@ -6,6 +6,7 @@ import { execFileSync } from "node:child_process";
 import { questionById } from "./bank.ts";
 import { postDir, savePost, type Post } from "./posts.ts";
 import { FFMPEG, STORY, renderSlides, renderVideoFrames, type VideoFrame } from "./render.ts";
+import { renderPromoFrames, renderPromoSlides } from "./render-promo.ts";
 
 function encodeVideo(frames: VideoFrame[], out: string): void {
   const dir = mkdtempSync(join(tmpdir(), "perquiz-video-"));
@@ -36,19 +37,20 @@ function encodeVideo(frames: VideoFrame[], out: string): void {
 }
 
 export async function buildPost(post: Post): Promise<Post> {
-  const q = questionById(post.questionId);
   const dir = postDir(post.id);
   savePost(post);
   for (const f of readdirSync(dir)) if (/\.(png|mp4)$/.test(f)) unlinkSync(join(dir, f));
 
-  const slides = await renderSlides(q, post.lang, post.copy.explanation);
+  const promo = post.kind === "promo" ? post.promo?.slides : undefined;
+  const q = promo ? null : questionById(post.questionId);
+  const slides = promo ? await renderPromoSlides(promo, post.lang) : await renderSlides(q!, post.lang, post.copy.explanation);
   post.files.slides = slides.map((png, i) => {
     const name = `slide-${i + 1}.png`;
     writeFileSync(join(dir, name), png);
     return name;
   });
 
-  const frames = await renderVideoFrames(q, post.lang, post.copy.hook, post.copy.explanation);
+  const frames = promo ? await renderPromoFrames(promo, post.lang) : await renderVideoFrames(q!, post.lang, post.copy.hook, post.copy.explanation);
   encodeVideo(frames, join(dir, "video.mp4"));
   post.files.video = "video.mp4";
 

@@ -17,6 +17,10 @@ const PORT = Number(process.env.REVIEW_PORT ?? 8790);
 const app = new Hono();
 
 function view(post: Post) {
+  const captions = { instagram: fullCaption(post, "instagram"), tiktok: fullCaption(post, "tiktok") };
+  if (post.kind === "promo") {
+    return { ...post, topicName: "Presentación de la app", exam: "", question: null, options: [], answer: null, captions };
+  }
   const q = questionById(post.questionId);
   return {
     ...post,
@@ -25,7 +29,7 @@ function view(post: Post) {
     question: q[post.lang],
     options: q.options.map((o) => ({ id: o.id, text: o[post.lang] })),
     answer: q.answer,
-    captions: { instagram: fullCaption(post, "instagram"), tiktok: fullCaption(post, "tiktok") },
+    captions,
   };
 }
 
@@ -55,7 +59,7 @@ app.patch("/api/posts/:id", async (c) => {
   if (typeof body.scheduledFor === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(body.scheduledFor)) post.scheduledFor = body.scheduledFor;
   if (body.status) {
     if (!STATUSES.includes(body.status)) return c.json({ error: "Estado no válido" }, 400);
-    if (body.status === "approved" && !post.copy.explanation) {
+    if (body.status === "approved" && post.kind !== "promo" && !post.copy.explanation) {
       return c.json({ error: "Escribe la explicación antes de aprobar" }, 400);
     }
     post.status = body.status;
@@ -76,6 +80,7 @@ app.post("/api/posts/:id/regenerate", async (c) => {
   const id = c.req.param("id");
   if (!exists(id)) return c.json({ error: "No existe" }, 404);
   const post = loadPost(id);
+  if (post.kind === "promo") return c.json({ error: "Los posts de presentación se escriben en src/launch.ts" }, 400);
   try {
     post.copy = await writeCopy(questionById(post.questionId), post.lang);
   } catch (err) {

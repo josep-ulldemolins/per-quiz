@@ -13,7 +13,7 @@ const require = createRequire(import.meta.url);
 export const FFMPEG: string = require("ffmpeg-static");
 
 // Colores de la web (app/src/styles.css).
-const C = {
+export const C = {
   ground: "#ffffff",
   surface: "#f2f5f6",
   border: "#e2e8ea",
@@ -36,14 +36,14 @@ const FONTS = [
 ];
 
 // Nodo mínimo al estilo de React que entiende Satori, para no necesitar JSX.
-type Style = Record<string, string | number>;
-interface El { type: string; props: { style?: Style; children?: Child | Child[]; src?: string; width?: number; height?: number } }
-type Child = El | string | null | false;
-function h(type: string, style: Style, ...children: Child[]): El {
+export type Style = Record<string, string | number>;
+export interface El { type: string; props: { style?: Style; children?: Child | Child[]; src?: string; width?: number; height?: number } }
+export type Child = El | string | null | false;
+export function h(type: string, style: Style, ...children: Child[]): El {
   return { type, props: { style: { display: "flex", boxSizing: "border-box", ...style }, children: children.filter((c) => c !== null && c !== false) } };
 }
 
-async function toPng(node: El, width: number, height: number): Promise<Buffer> {
+export async function toPng(node: El, width: number, height: number): Promise<Buffer> {
   const svg = await satori(node as never, { width, height, fonts: FONTS });
   return new Resvg(svg, { fitTo: { mode: "width", value: width } }).render().asPng();
 }
@@ -194,7 +194,7 @@ function card(q: Question, o: CardOptions): El {
   );
 }
 
-function ctaCard(lang: Lang, width: number, height: number): El {
+export function ctaCard(lang: Lang, width: number, height: number): El {
   const cta = config.cta[lang];
   return h(
     "div",
@@ -210,7 +210,7 @@ function ctaCard(lang: Lang, width: number, height: number): El {
   );
 }
 
-const FEED = { width: 1080, height: 1350 };
+export const FEED = { width: 1080, height: 1350 };
 export const STORY = { width: 1080, height: 1920 };
 
 /** Carrusel de Instagram: pregunta, respuesta con explicación y llamada a la acción. */

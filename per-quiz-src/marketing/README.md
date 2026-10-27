@@ -41,6 +41,20 @@ La suscripción Pro de Claude no da saldo para la API. Mientras tanto, cada sema
 3. `npm run redraw` vuelve a dibujar los pendientes con esos textos (o `npm run redraw -- <id>` uno concreto).
 4. Revisión normal con `npm run review`.
 
+## Posts de presentación de la app
+
+Los posts que dan a conocer PER Quiz (presentación, cómo es el examen, tests a medida) están escritos en
+`src/launch.ts`: cada uno es una lista de slides (portada, pantalla de la app en un móvil, datos clave o llamada a la
+acción) más sus textos.
+
+```bash
+npm run screenshots                 # con la app en marcha (cd ../app && npm run dev): capturas en assets/screens/
+npm run launch -- --start 2026-10-28  # los crea en queue/, uno al día; los que ya existan no se repiten
+```
+
+Las capturas se hacen con un usuario de prueba propio (`marketing@per-quiz.test`, solo en la base de datos local)
+al que el script le da algo de historial, en castellano y tema claro. Se vuelven a sacar cuando cambie la interfaz.
+
 ## Revisar
 
 En `npm run review` cada post muestra los tres slides, el vídeo y los textos editables:

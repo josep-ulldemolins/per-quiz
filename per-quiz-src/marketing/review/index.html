@@ -24,7 +24,7 @@
   main { padding: 24px 32px 80px; display: grid; gap: 20px; max-width: 1400px; }
   .empty { color: var(--muted); padding: 40px 0; }
   .post { background: var(--ground); border: 1px solid var(--border); border-radius: 22px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 24px; }
-  .media { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 0.8fr); gap: 10px; align-items: start; }
+  .media { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; align-items: start; }
   .media img, .media video { width: 100%; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); display: block; }
   .media a { display: block; }
   .meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
@@ -112,8 +112,9 @@ function postHtml(p) {
   const warnings = [];
   if (!p.copy.answerCheck.agrees) warnings.push(`<strong>La IA no está de acuerdo con la respuesta oficial</strong>${esc(p.copy.answerCheck.note)}`);
   else if (p.copy.answerCheck.note) warnings.push(`<strong>Nota de la IA sobre la respuesta</strong>${esc(p.copy.answerCheck.note)}`);
-  if (!p.copy.explanation) warnings.push("<strong>Falta la explicación</strong>Escríbela (o regenera con IA) y vuelve a dibujar antes de aprobar.");
-  if (!p.ai) warnings.push("<strong>Generado sin IA</strong>Los textos son de plantilla.");
+  const promo = p.kind === "promo";
+  if (!promo && !p.copy.explanation) warnings.push("<strong>Falta la explicación</strong>Escríbela (o regenera con IA) y vuelve a dibujar antes de aprobar.");
+  if (!promo && !p.ai) warnings.push("<strong>Generado sin IA</strong>Los textos son de plantilla.");
 
   return `<article class="post" data-id="${p.id}">
     <div class="media">
@@ -124,20 +125,20 @@ function postHtml(p) {
       <div class="meta">
         <span class="pill ${p.status}">${STATUS[p.status]}</span>
         <span class="pill topic">${esc(p.topicName)}</span>
-        <span class="muted">${esc(p.questionId)} · ${esc(p.exam)}</span>
+        ${promo ? "" : `<span class="muted">${esc(p.questionId)} · ${esc(p.exam)}</span>`}
       </div>
-      <div class="question">${esc(p.question)}</div>
-      <ul class="options">${p.options.map((o) => `<li class="${o.id === p.answer ? "correct" : ""}">${o.id.toUpperCase()}) ${esc(o.text)}</li>`).join("")}</ul>
+      ${promo ? `<div class="question">${esc(p.copy.hook)}</div><p class="muted">Slides definidos en src/launch.ts; aquí se editan los textos.</p>` : `<div class="question">${esc(p.question)}</div>
+      <ul class="options">${p.options.map((o) => `<li class="${o.id === p.answer ? "correct" : ""}">${o.id.toUpperCase()}) ${esc(o.text)}</li>`).join("")}</ul>`}
       ${warnings.map((w) => `<div class="alert">${w}</div>`).join("")}
 
       <label for="${p.id}-scheduledFor">Publicación · ${esc(day)}</label>
       <input type="datetime-local" id="${p.id}-scheduledFor" name="scheduledFor" value="${esc(p.scheduledFor)}" />
 
-      <label for="${p.id}-hook">Gancho del vídeo ${counter(p.copy.hook, 45)}</label>
+      ${promo ? `<input type="hidden" name="hook" value="${esc(p.copy.hook)}" /><input type="hidden" name="explanation" value="" />` : `<label for="${p.id}-hook">Gancho del vídeo ${counter(p.copy.hook, 45)}</label>
       <input id="${p.id}-hook" name="hook" value="${esc(p.copy.hook)}" data-max="45" />
 
       <label for="${p.id}-explanation">Explicación (slide 2 y vídeo) ${counter(p.copy.explanation, 260)}</label>
-      <textarea id="${p.id}-explanation" name="explanation" rows="3" data-max="260">${esc(p.copy.explanation)}</textarea>
+      <textarea id="${p.id}-explanation" name="explanation" rows="3" data-max="260">${esc(p.copy.explanation)}</textarea>`}
 
       <label for="${p.id}-instagramCaption">Texto de Instagram <button class="copy" data-copy="instagram">Copiar con hashtags</button> ${counter(p.copy.instagramCaption, 900)}</label>
       <textarea id="${p.id}-instagramCaption" name="instagramCaption" rows="6" data-max="900">${esc(p.copy.instagramCaption)}</textarea>
@@ -155,7 +156,7 @@ function postHtml(p) {
         <button class="primary" data-action="approve">Guardar y aprobar</button>
         <button data-action="render">Guardar y volver a dibujar</button>
         <button data-action="save">Guardar</button>
-        <button data-action="regenerate">Regenerar con IA</button>
+        ${promo ? "" : `<button data-action="regenerate">Regenerar con IA</button>`}
         <button class="danger" data-action="reject">Rechazar</button>
       </div>
     </div>

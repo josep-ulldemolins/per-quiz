@@ -18,10 +18,22 @@ export interface PostCopy {
   answerCheck: { agrees: boolean; note: string };
 }
 
+/** Un slide de un post de presentación de la app. Las capturas son ficheros de assets/screens/ (npm run screenshots). */
+export type PromoSlide =
+  | { type: "cover"; eyebrow: string; title: string; subtitle: string; screen?: string }
+  | { type: "screen"; eyebrow: string; title: string; text: string; screen: string }
+  | { type: "points"; eyebrow: string; title: string; points: { value: string; label: string }[]; note?: string }
+  | { type: "cta" };
+
 export interface Post {
   id: string;
+  /** Sin definir en los posts antiguos, que son todos de pregunta. */
+  kind?: "question" | "promo";
+  /** Pregunta del banco (posts de pregunta) o "" en los de presentación. */
   questionId: string;
+  /** Tema de la pregunta, o "app" en los de presentación. */
   topic: string;
+  promo?: { slides: PromoSlide[] };
   lang: Lang;
   /** Fecha y hora local, «2026-11-03T19:00». */
   scheduledFor: string;
