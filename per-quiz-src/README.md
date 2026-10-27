@@ -29,7 +29,8 @@ scripts/
   fix_bank.py        repara cabeceras de tema y etiquetas de color coladas en el texto
 web/data/            banco de preguntas generado
 app/                 la aplicación
-  server/            API (Node + Hono + SQLite de Node): cuentas, tests, respuestas, estadísticas
+  server/            API (Hono en un Worker de Cloudflare + D1): cuentas, tests, respuestas, estadísticas
+  migrations/        esquema de la base de datos D1
   shared/exam.ts     forma del banco y criterios oficiales de aprobado (cliente y servidor)
   src/               interfaz (React + Vite), en castellano y catalán, tema claro y oscuro
   content/temario/   teoría de cada tema en Markdown (<tema>.<es|ca>.md) e imágenes en img/
@@ -38,28 +39,44 @@ marketing/           campaña en Instagram y TikTok generada desde el banco, con
 
 ## La aplicación
 
-Necesita Node 24 o superior (usa `node:sqlite` y ejecuta TypeScript sin compilar).
+Se publica en **Cloudflare** (plan gratuito): un Worker sirve la API en `/api/*` y la web compilada (`dist/`, con
+las figuras `img/`) como ficheros estáticos, y los datos viven en **D1**, la base de datos SQLite de Cloudflare.
+No hace falta servidor propio. Necesita Node 22 o superior.
 
 ```bash
 cd app
 npm install
-npm run dev          # API en :8787 y web en http://localhost:5173
+npm run dev          # API (Worker + D1 local) en :8787 y web en http://localhost:5173
+npm run preview      # compila y lo sirve todo desde el Worker en :8787, como en producción
 ```
 
-Para producción:
+La base de datos local vive en `app/.wrangler/`. `npm run dev` le aplica las migraciones de `app/migrations/` y crea
+el usuario de prueba `demo@per-quiz.test` / `demo-per-2026`. Cada usuario guarda sus tests, respuestas y preguntas
+marcadas. La dificultad «para todos» sale del porcentaje de fallo de todos los usuarios en cada pregunta, a partir
+de 3 respuestas.
+
+### Publicar en Cloudflare
+
+La primera vez, con una cuenta de Cloudflare:
 
 ```bash
-npm run build
-npm start            # sirve la web y la API en :8787 (API_PORT para cambiarlo)
+npx wrangler login
+npx wrangler d1 create per-quiz      # copia el database_id que imprime en app/wrangler.jsonc
+npm run db:migrate                   # crea las tablas en la D1 de producción
+npm run deploy                       # compila y publica en https://per-quiz.<tu-subdominio>.workers.dev
 ```
 
-Para publicarla en un VPS con Docker y HTTPS, sigue [deploy/README.md](../deploy/README.md).
+Después, cada publicación es `npm run deploy`. Si cambias el esquema, añade un fichero nuevo en `app/migrations/`
+(`npx wrangler d1 migrations create per-quiz <nombre>`) y ejecuta `npm run db:migrate` antes de publicar.
 
-La base de datos se crea en `app/data/per-quiz.db` (`DB_PATH` para cambiarla). Cada usuario guarda sus tests,
-respuestas y preguntas marcadas. La dificultad «para todos» sale del porcentaje de fallo de todos los usuarios
-en cada pregunta, a partir de 3 respuestas.
-
-Usuario de prueba de la base de datos local de desarrollo: `demo@per-quiz.test` / `demo-per-2026`.
+- **Dominio propio**: en el panel de Cloudflare, Workers → per-quiz → Settings → Domains & Routes, o con una
+  entrada `routes` en `wrangler.jsonc`.
+- **Copias de seguridad**: D1 guarda 30 días de historial y puede volver a cualquier minuto
+  (`npx wrangler d1 time-travel restore per-quiz --timestamp=<fecha>`). Para una copia fuera de Cloudflare:
+  `npx wrangler d1 export per-quiz --remote --output=per-quiz.sql`.
+- **Límites del plan gratuito**: 100 000 peticiones al día y 10 ms de CPU por petición. Las contraseñas se guardan
+  con PBKDF2 para que el inicio de sesión quepa en ese margen; si los registros de Cloudflare muestran errores de
+  CPU en `/api/auth/*`, el plan Workers Paid (5 $/mes) los quita sin cambiar código.
 
 ## Temario
 

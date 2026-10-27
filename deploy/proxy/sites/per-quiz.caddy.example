@@ -1,5 +1,0 @@
-# Copy to per-quiz.caddy and set your domain.
-per.example.com {
-	import common
-	reverse_proxy per-quiz:8787
-}
